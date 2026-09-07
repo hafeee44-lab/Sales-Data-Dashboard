@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { DataProvider } from "./context/DataContext";
 import { CustomersPage } from "./pages/CustomersPage";
@@ -10,7 +10,7 @@ import { SalesPage } from "./pages/SalesPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <DataProvider>
         <AppShell>
           <Routes>
@@ -23,6 +23,6 @@ export default function App() {
           </Routes>
         </AppShell>
       </DataProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
