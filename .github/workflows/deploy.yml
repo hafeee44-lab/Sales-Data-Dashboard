@@ -31,7 +31,10 @@ jobs:
       - name: Install dependencies
         working-directory: webapp
         run: npm ci
-
+        
+      - name: Copy data file
+        working-directory: webapp
+        run: npm run copy-data
       - name: Build dashboard
         working-directory: webapp
         run: npm run build
@@ -54,3 +57,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      
