@@ -57,6 +57,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (errors.length) setError("The cleaned CSV could not be parsed.");
         const parsed = data.map(toRow).filter((row) => !Number.isNaN(row.orderDate.getTime()));
         setRows(parsed);
+        if (parsed.length) {
+          const dates = parsed.map((row) => row.orderDate.getTime());
+          setRange({
+            startDate: dateInputValue(new Date(Math.min(...dates))),
+            endDate: dateInputValue(new Date(Math.max(...dates))),
+          });
+        }
         setIsLoading(false);
       },
       error: () => {

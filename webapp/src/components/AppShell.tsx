@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { BarChart3, BookOpenText, Boxes, ChevronRight, LayoutDashboard, Menu, Moon, Sun, UsersRound, WalletCards, X } from "lucide-react";
+import { BarChart3, BookOpenText, Boxes, ChevronRight, LayoutDashboard, Menu, Moon, Sun, UsersRound, WalletCards } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { classNames } from "../lib/utils";
@@ -51,9 +51,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-line bg-white/95 px-4 py-3 backdrop-blur dark:bg-[#111827]/95 md:px-7">
-          <div className="flex min-w-0 items-center gap-2 text-sm text-muted"><button className="icon-button lg:hidden" type="button" onClick={() => setIsOpen(true)} aria-label="Open navigation"><Menu size={18} /></button><span className="hidden sm:inline">Analytics</span><ChevronRight className="hidden sm:block" size={15} /><span className="truncate font-medium text-ink">{pageTitles[location.pathname]}</span></div>
-          <div className="flex items-center gap-2"><DateRangeFilter /><button className="icon-button" type="button" onClick={() => setIsDark((current) => !current)} aria-label="Toggle color theme">{isDark ? <Sun size={17} /> : <Moon size={17} />}</button><button className="icon-button lg:hidden" type="button" onClick={() => setIsOpen(false)} aria-label="Close navigation"><X size={17} /></button></div>
+        <header className="sticky top-0 z-20 flex min-h-16 flex-col gap-2 border-b border-line bg-white/95 px-3 py-2 backdrop-blur dark:bg-[#111827]/95 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3 md:px-7">
+          <div className="flex min-w-0 items-center gap-2 text-sm text-muted"><button className="icon-button lg:hidden" type="button" onClick={() => setIsOpen(true)} aria-label="Open navigation" aria-expanded={isOpen}><Menu size={18} /></button><span className="hidden sm:inline">Analytics</span><ChevronRight className="hidden sm:block" size={15} /><span className="truncate font-medium text-ink">{pageTitles[location.pathname]}</span></div>
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto"><DateRangeFilter /><button className="icon-button shrink-0" type="button" onClick={() => setIsDark((current) => !current)} aria-label="Toggle color theme">{isDark ? <Sun size={17} /> : <Moon size={17} />}</button></div>
         </header>
         <main className="mx-auto max-w-[1600px] px-4 py-7 md:px-7">{children}</main>
       </div>
