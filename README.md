@@ -5,7 +5,6 @@ An interactive, production-grade retail analytics dashboard built from the Super
 Live Demo: [https://haiderimran019.github.io/Sales-Data-Dashboard/](https://haiderimran019.github.io/Sales-Data-Dashboard/)
 GitHub Repository: [https://github.com/haiderimran019/Sales-Data-Dashboard](https://github.com/haiderimran019/Sales-Data-Dashboard)
 
-# ==================================================
 KEY FEATURES & FUNCTIONAL MODULES
 
 • Executive Overview (/): High-level KPI summary (Sales, Profit, Profit Margin, Total Orders, Average Order Value) with interactive trend indicators.
@@ -16,7 +15,6 @@ KEY FEATURES & FUNCTIONAL MODULES
 • Business Insights (/insights): Automated data narrative highlighting key operational takeaways and data preparation methodologies.
 • Interactive Controls: Date-range filtering, dynamic KPI calculations, light/dark mode toggling, responsive charts, and smooth page transitions.
 
-# ==================================================
 TECHNOLOGY STACK
 
 Frontend & User Interface:
@@ -34,7 +32,6 @@ Data Analysis & Processing Layer:
 • Python: Core language used for data extraction, cleaning, and preprocessing.
 • Pandas & Jupyter Notebooks: Exploratory Data Analysis (EDA), feature engineering, handling missing values, and exporting the final production-ready dataset.
 
-# ==================================================
 END-TO-END DATA PIPELINE
 
 1. Extraction & Cleaning: Raw retail data is processed in Python Jupyter Notebooks to remove duplicates, format dates, and engineer profit margin columns.
@@ -42,7 +39,6 @@ END-TO-END DATA PIPELINE
 3. Client Ingestion: Papa Parse asynchronously fetches and parses the CSV into structured JSON objects upon initial page load.
 4. Context & State Management: DataContext.tsx normalizes date fields, computes cross-view aggregations, and distributes state throughout the component tree.
 
-# ==================================================
 REPOSITORY STRUCTURE
 
 Sales-Data-Dashboard/
@@ -69,7 +65,6 @@ Sales-Data-Dashboard/
 │   └── vite.config.ts            Vite configuration
 └── README.md                     Project documentation
 
-# ==================================================
 GETTING STARTED LOCALLY
 
 Prerequisites:
@@ -88,7 +83,6 @@ npm run dev
 4. Build for Production:
 npm run build
 
-# ==================================================
 CONTINUOUS INTEGRATION & DEPLOYMENT (CI/CD)
 
 The project leverages GitHub Actions for continuous deployment to GitHub Pages.
@@ -100,7 +94,6 @@ The workflow configuration (.github/workflows/deploy.yml) automates the deployme
 3. Build: Executes npm ci and npm run build to output optimized static assets in dist/.
 4. Deploy: Uploads the production bundle directly to the gh-pages deployment branch.
 
-# ==================================================
 AUTHOR
 
 Haider Imran
