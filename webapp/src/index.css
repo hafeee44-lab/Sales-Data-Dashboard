@@ -80,6 +80,37 @@
     @apply border-b border-line/60 py-2.5 text-ink;
   }
 
+  .recharts-tooltip-wrapper {
+    @apply outline-none;
+  }
+
+  .recharts-default-tooltip {
+    background-color: hsl(var(--surface)) !important;
+    border: 1px solid hsl(var(--line)) !important;
+    border-radius: 0.625rem !important;
+    box-shadow: 0 12px 24px rgb(15 23 42 / 0.12) !important;
+    color: hsl(var(--ink)) !important;
+    padding: 0.7rem 0.8rem !important;
+  }
+
+  .recharts-tooltip-label,
+  .recharts-tooltip-item,
+  .recharts-tooltip-item-name,
+  .recharts-tooltip-item-value,
+  .recharts-tooltip-item-separator {
+    color: hsl(var(--ink)) !important;
+  }
+
+  .recharts-tooltip-label {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .recharts-tooltip-item {
+    padding-bottom: 0.15rem !important;
+    padding-top: 0.15rem !important;
+  }
+
   .heatmap {
     @apply w-full border-separate border-spacing-2 text-xs;
   }
