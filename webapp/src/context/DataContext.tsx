@@ -21,13 +21,33 @@ const value = (input: unknown) => String(input ?? "").trim();
 const numeric = (input: unknown) => Number(input) || 0;
 const field = (record: Record<string, unknown>, ...names: string[]) => {
   const entries = Object.entries(record);
-  const match = entries.find(([key]) => names.some((name) => key.trim().toLowerCase() === name.toLowerCase()));
+  const normalize = (input: string) => input.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const match = entries.find(([key]) => names.some((name) => normalize(key) === normalize(name)));
   return match?.[1];
 };
 
+const parseDate = (input: unknown) => {
+  const raw = value(input);
+  if (!raw) return new Date(Number.NaN);
+  if (/^\d+(\.\d+)?$/.test(raw)) {
+    const serial = Number(raw);
+    if (serial > 20000 && serial < 100000) return new Date(Date.UTC(1899, 11, 30) + serial * 86400000);
+  }
+  const parts = raw.split(/[\/.-]/).map(Number);
+  if (parts.length === 3 && parts.every(Number.isFinite)) {
+    const [first, second, third] = parts;
+    if (first > 31) return new Date(Date.UTC(first, second - 1, third));
+    if (third > 31) {
+      const year = third < 100 ? third + 2000 : third;
+      return new Date(Date.UTC(year, first - 1, second));
+    }
+  }
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? new Date(Number.NaN) : parsed;
+};
+
 const dateField = (record: Record<string, unknown>, ...names: string[]) => {
-  const input = value(field(record, ...names));
-  return new Date(`${input}T00:00:00`);
+  return parseDate(field(record, ...names));
 };
 
 const toRow = (record: Record<string, unknown>): OrderRow => ({
