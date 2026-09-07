@@ -10,7 +10,7 @@ import { SalesPage } from "./pages/SalesPage";
 
 export default function App() {
   return (
-    <HashRouter>
+    <HashRouter basename={import.meta.env.BASE_URL}>
       <DataProvider>
         <AppShell>
           <Routes>
