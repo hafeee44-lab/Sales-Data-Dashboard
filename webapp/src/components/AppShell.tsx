@@ -17,13 +17,24 @@ const pageTitles: Record<string, string> = {
   "/": "Executive dashboard", "/sales": "Sales analysis", "/profitability": "Profitability", "/customers": "Customers", "/products": "Product explorer", "/insights": "Insights & data story",
 };
 
+const themeKey = "superstore-theme";
+
+function readStoredTheme() {
+  const stored = localStorage.getItem(themeKey);
+
+  if (stored === "dark" || stored === "light") return stored === "dark";
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(readStoredTheme);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem(themeKey, isDark ? "dark" : "light");
   }, [isDark]);
 
   useEffect(() => {
