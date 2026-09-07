@@ -45,13 +45,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-canvas text-ink">
       {isOpen && <button className="fixed inset-0 z-30 bg-slate-950/25 lg:hidden" aria-label="Close navigation" onClick={() => setIsOpen(false)} />}
       <aside className={classNames("fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-[#111827] px-4 py-5 text-slate-100 shadow-[8px_0_30px_rgba(15,23,42,0.06)] transition-transform lg:translate-x-0", isOpen ? "translate-x-0" : "-translate-x-full")}>
-        <NavLink to="/" className="flex items-center gap-3 px-2 text-base font-semibold tracking-tight text-white">
-          <span className="brand-mark" aria-hidden="true" />
-          <span className="flex flex-col leading-none">
-            <span className="text-[10px] uppercase tracking-[0.22em] text-slate-300">Superstore</span>
-            <span className="mt-1 text-lg font-semibold tracking-[-0.06em]">Insights</span>
-          </span>
-        </NavLink>
+        <div className="flex items-center justify-between gap-2 px-2">
+          <NavLink to="/" className="flex items-center gap-3 text-base font-semibold tracking-tight text-white">
+            <span className="brand-mark" aria-hidden="true" />
+            <span className="flex flex-col leading-none">
+              <span className="text-[10px] uppercase tracking-[0.22em] text-slate-300">Superstore</span>
+              <span className="mt-1 text-lg font-semibold tracking-[-0.06em]">Insights</span>
+            </span>
+          </NavLink>
+
+          <button
+            className="icon-button text-slate-300 hover:bg-white/10 hover:text-white lg:hidden"
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close navigation"
+          >
+            <X size={17} />
+          </button>
+        </div>
         <p className="mt-8 px-2 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Analytics</p>
         <nav className="mt-3 space-y-1" aria-label="Dashboard pages">
           {navigation.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => classNames("nav-link", isActive && "nav-link-active")}><Icon size={17} />{label}</NavLink>)}
@@ -64,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-line bg-white/95 px-4 py-3 backdrop-blur dark:bg-[#111827]/95 md:px-7">
           <div className="flex min-w-0 items-center gap-2 text-sm text-muted"><button className="icon-button lg:hidden" type="button" onClick={() => setIsOpen(true)} aria-label="Open navigation"><Menu size={18} /></button><span className="hidden sm:inline">Analytics</span><ChevronRight className="hidden sm:block" size={15} /><span className="truncate font-medium text-ink">{pageTitles[location.pathname]}</span></div>
-          <div className="flex items-center gap-2"><DateRangeFilter /><button className="icon-button" type="button" onClick={() => setIsDark((current) => !current)} aria-label="Toggle color theme">{isDark ? <Sun size={17} /> : <Moon size={17} />}</button><button className="icon-button lg:hidden" type="button" onClick={() => setIsOpen(false)} aria-label="Close navigation"><X size={17} /></button></div>
+          <div className="flex items-center gap-2"><DateRangeFilter /><button className="icon-button" type="button" onClick={() => setIsDark((current) => !current)} aria-label="Toggle color theme">{isDark ? <Sun size={17} /> : <Moon size={17} />}</button></div>
         </header>
         <main className="mx-auto max-w-[1600px] px-4 py-7 md:px-7">{children}</main>
       </div>
