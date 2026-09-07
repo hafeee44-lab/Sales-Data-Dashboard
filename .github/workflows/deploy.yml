@@ -39,6 +39,16 @@ jobs:
         working-directory: webapp
         run: npm run build
 
+      - name: Verify Pages artifact
+        working-directory: webapp
+        run: |
+          test -s dist/index.html
+          test -s dist/404.html
+          test -s dist/data/superstore_clean.csv
+          asset=$(sed -n 's/.*src="\([^"]*\.js\)".*/\1/p' dist/index.html)
+          test -n "$asset"
+          test -s "dist${asset#\/Sales-Data-Dashboard}"
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -58,4 +68,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      
+
