@@ -7,7 +7,7 @@ type Props = {
   value: string;
   detail: string;
   delta?: number | null;
-  emphasis?: "positive" | "default";
+  emphasis?: "positive" | "negative" | "default";
 };
 
 export function KpiCard({ label, value, detail, delta, emphasis = "default" }: Props) {
@@ -22,7 +22,15 @@ export function KpiCard({ label, value, detail, delta, emphasis = "default" }: P
       transition={{ duration: 0.35 }}
     >
       <p className="text-sm font-medium text-muted">{label}</p>
-      <p className={classNames("mt-3 text-3xl font-semibold tracking-tight", emphasis === "positive" && "text-positive")}>{value}</p>
+      <p
+        className={classNames(
+          "mt-3 text-3xl font-semibold tracking-tight",
+          emphasis === "positive" && "text-positive",
+          emphasis === "negative" && "text-negative"
+        )}
+      >
+        {value}
+      </p>
       <div className="mt-3 flex items-center gap-2 text-xs">
         {hasDelta && (
           <span className={classNames("inline-flex items-center gap-0.5 font-medium", isUp ? "text-positive" : "text-negative")}>

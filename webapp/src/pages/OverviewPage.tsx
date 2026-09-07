@@ -68,7 +68,7 @@ export function OverviewPage() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard label="Total sales" value={currency(summary.sales, true)} delta={lastMonthDelta(filteredRows, "sales")} detail="latest month vs. prior" />
-        <KpiCard label="Total profit" value={currency(summary.profit, true)} delta={lastMonthDelta(filteredRows, "profit")} detail="latest month vs. prior" emphasis="positive" />
+        <KpiCard label="Total profit" value={currency(summary.profit, true)} delta={lastMonthDelta(filteredRows, "profit")} detail="latest month vs. prior" emphasis={summary.profit >= 0 ? "positive" : "negative"} />
         <KpiCard label="Profit margin" value={percent(summary.sales ? summary.profit / summary.sales * 100 : 0)} detail="profit as a share of sales" />
         <KpiCard label="Total orders" value={number(summary.orders)} detail="unique customer orders" />
         <KpiCard label="Avg. order value" value={currency(summary.orders ? summary.sales / summary.orders : 0, true)} detail="sales per unique order" />
