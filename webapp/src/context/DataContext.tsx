@@ -49,7 +49,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Papa.parse<Record<string, unknown>>("/data/superstore_clean.csv", {
+    Papa.parse<Record<string, unknown>>(`${import.meta.env.BASE_URL}data/superstore_clean.csv`, {
       download: true,
       header: true,
       skipEmptyLines: true,

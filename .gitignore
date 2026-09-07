@@ -8,6 +8,7 @@ webapp/dist/
 webapp/public/data/superstore_clean.csv
 *.tsbuildinfo
 webapp/**/*.d.ts
+!webapp/src/vite-env.d.ts
 webapp/tailwind.config.js
 webapp/vite.config.js
 
