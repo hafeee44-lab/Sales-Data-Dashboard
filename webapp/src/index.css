@@ -89,6 +89,10 @@
     @apply border-b border-line/60 py-2.5 text-ink;
   }
 
+  .sort-header {
+    @apply inline-flex w-full items-center gap-1.5 rounded transition-colors duration-150 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30;
+  }
+
   .recharts-tooltip-wrapper {
     @apply outline-none;
   }

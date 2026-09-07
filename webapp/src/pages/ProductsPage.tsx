@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Download, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Search, SlidersHorizontal, X } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartCard } from "../components/ChartCard";
 import { EmptyState, LoadingState } from "../components/EmptyState";
@@ -11,6 +11,12 @@ import type { OrderRow } from "../types";
 
 const pageSize = 12;
 
+type SortKey = "productName" | "category" | "region" | "sales" | "quantity" | "discount" | "profit";
+
+type SortState = { key: SortKey; direction: "asc" | "desc" };
+
+const numericKeys: SortKey[] = ["sales", "quantity", "discount", "profit"];
+
 export function ProductsPage() {
   const { filteredRows, isLoading, error } = useData();
   const [search, setSearch] = useState("");
@@ -18,17 +24,40 @@ export function ProductsPage() {
   const [subCategory, setSubCategory] = useState("");
   const [region, setRegion] = useState("");
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<SortState>({ key: "sales", direction: "desc" });
   const [selected, setSelected] = useState<OrderRow | null>(null);
   const categories = useMemo(() => [...new Set(filteredRows.map((row) => row.category))].sort(), [filteredRows]);
   const subCategories = useMemo(() => [...new Set(filteredRows.filter((row) => !category || row.category === category).map((row) => row.subCategory))].sort(), [filteredRows, category]);
   const regions = useMemo(() => [...new Set(filteredRows.map((row) => row.region))].sort(), [filteredRows]);
   const matches = useMemo(() => filteredRows.filter((row) => (!search || `${row.productName} ${row.productId}`.toLowerCase().includes(search.toLowerCase())) && (!category || row.category === category) && (!subCategory || row.subCategory === subCategory) && (!region || row.region === region)), [filteredRows, search, category, subCategory, region]);
-  const pages = Math.max(1, Math.ceil(matches.length / pageSize));
-  const displayedRows = matches.slice((Math.min(page, pages) - 1) * pageSize, Math.min(page, pages) * pageSize);
+  const sorted = useMemo(() => {
+    const factor = sort.direction === "asc" ? 1 : -1;
+
+    return [...matches].sort((a, b) => {
+      const left = a[sort.key];
+      const right = b[sort.key];
+
+      if (typeof left === "number" && typeof right === "number") return (left - right) * factor;
+
+      return String(left).localeCompare(String(right)) * factor;
+    });
+  }, [matches, sort]);
+
+  const pages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const displayedRows = sorted.slice((Math.min(page, pages) - 1) * pageSize, Math.min(page, pages) * pageSize);
   const reset = () => { setSearch(""); setCategory(""); setSubCategory(""); setRegion(""); setPage(1); };
+
+  const toggleSort = (key: SortKey) => {
+    setSort((current) =>
+      current.key === key
+        ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: numericKeys.includes(key) ? "desc" : "asc" }
+    );
+    setPage(1);
+  };
   const exportRows = () => {
     const headers = ["Product ID", "Product Name", "Category", "Sub-Category", "Region", "Sales", "Quantity", "Discount", "Profit"];
-    const body = matches.map((row) => [row.productId, row.productName, row.category, row.subCategory, row.region, row.sales, row.quantity, row.discount, row.profit].map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","));
+    const body = sorted.map((row) => [row.productId, row.productName, row.category, row.subCategory, row.region, row.sales, row.quantity, row.discount, row.profit].map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","));
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([[headers.join(","), ...body].join("\n")], { type: "text/csv;charset=utf-8" }));
     link.download = "superstore-products-filtered.csv";
@@ -47,11 +76,39 @@ export function ProductsPage() {
         <SelectFilter label="Region" value={region} onChange={(value) => { setRegion(value); setPage(1); }} options={regions} />
         <button className="secondary-button justify-center" type="button" onClick={reset}><SlidersHorizontal size={16} /> Reset</button>
       </div>
-      <div className="overflow-x-auto"><table className="data-table"><thead><tr><th>Product</th><th>Category</th><th>Region</th><th className="text-right">Sales</th><th className="text-right">Qty.</th><th className="text-right">Discount</th><th className="text-right">Profit</th></tr></thead><tbody>{displayedRows.map((row) => <tr className="cursor-pointer hover:bg-brand/5" onClick={() => setSelected(row)} onKeyDown={(event) => event.key === "Enter" && setSelected(row)} tabIndex={0} key={row.rowId}><td><p className="max-w-80 truncate font-medium" title={row.productName}>{row.productName}</p><p className="mt-0.5 text-xs text-muted">{row.productId}</p></td><td>{row.category}<span className="block text-xs text-muted">{row.subCategory}</span></td><td>{row.region}</td><td className="text-right font-medium">{currency(row.sales)}</td><td className="text-right">{row.quantity}</td><td className="text-right">{(row.discount * 100).toFixed(0)}%</td><td className={classNames("text-right font-medium", row.profit < 0 && "text-negative")}>{currency(row.profit)}</td></tr>)}</tbody></table></div>
+      <div className="overflow-x-auto"><table className="data-table"><thead>
+        <tr>
+          <SortHeader label="Product" sortKey="productName" sort={sort} onSort={toggleSort} />
+          <SortHeader label="Category" sortKey="category" sort={sort} onSort={toggleSort} />
+          <SortHeader label="Region" sortKey="region" sort={sort} onSort={toggleSort} />
+          <SortHeader label="Sales" sortKey="sales" sort={sort} onSort={toggleSort} align="right" />
+          <SortHeader label="Qty." sortKey="quantity" sort={sort} onSort={toggleSort} align="right" />
+          <SortHeader label="Discount" sortKey="discount" sort={sort} onSort={toggleSort} align="right" />
+          <SortHeader label="Profit" sortKey="profit" sort={sort} onSort={toggleSort} align="right" />
+        </tr>
+      </thead><tbody>{displayedRows.map((row) => <tr className="cursor-pointer hover:bg-brand/5" onClick={() => setSelected(row)} onKeyDown={(event) => event.key === "Enter" && setSelected(row)} tabIndex={0} key={row.rowId}><td><p className="max-w-80 truncate font-medium" title={row.productName}>{row.productName}</p><p className="mt-0.5 text-xs text-muted">{row.productId}</p></td><td>{row.category}<span className="block text-xs text-muted">{row.subCategory}</span></td><td>{row.region}</td><td className="text-right font-medium">{currency(row.sales)}</td><td className="text-right">{row.quantity}</td><td className="text-right">{(row.discount * 100).toFixed(0)}%</td><td className={classNames("text-right font-medium", row.profit < 0 && "text-negative")}>{currency(row.profit)}</td></tr>)}</tbody></table></div>
       <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted"><span>Page {Math.min(page, pages)} of {pages}</span><div className="flex gap-2"><button className="secondary-button" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>Previous</button><button className="secondary-button" disabled={page >= pages} onClick={() => setPage((current) => current + 1)}>Next</button></div></div>
     </ChartCard>}
     {selected && <ProductDrawer row={selected} allRows={filteredRows} close={() => setSelected(null)} />}
   </>;
+}
+
+function SortHeader({ label, sortKey, sort, onSort, align = "left" }: { label: string; sortKey: SortKey; sort: SortState; onSort: (key: SortKey) => void; align?: "left" | "right" }) {
+  const isActive = sort.key === sortKey;
+  const Icon = !isActive ? ArrowUpDown : sort.direction === "asc" ? ArrowUp : ArrowDown;
+
+  return (
+    <th aria-sort={isActive ? (sort.direction === "asc" ? "ascending" : "descending") : "none"} className={align === "right" ? "text-right" : undefined}>
+      <button
+        className={classNames("sort-header", align === "right" && "justify-end", isActive && "text-brand")}
+        type="button"
+        onClick={() => onSort(sortKey)}
+      >
+        {label}
+        <Icon className={classNames("shrink-0", !isActive && "opacity-40")} size={13} />
+      </button>
+    </th>
+  );
 }
 
 function SelectFilter({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
