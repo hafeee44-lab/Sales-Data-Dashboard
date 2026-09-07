@@ -1,0 +1,16 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+
+webapp/node_modules/
+webapp/dist/
+webapp/public/data/superstore_clean.csv
+*.tsbuildinfo
+webapp/**/*.d.ts
+webapp/tailwind.config.js
+webapp/vite.config.js
+
+.env
+.env.*
+!.env.example
