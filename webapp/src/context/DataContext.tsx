@@ -11,35 +11,47 @@ type DataContextValue = {
   isLoading: boolean;
   error: string | null;
   dateBounds: DateRange;
+  sourceName: string;
+  importCsv: (file: File) => Promise<void>;
 };
 
 const DataContext = createContext<DataContextValue | null>(null);
 
 const value = (input: unknown) => String(input ?? "").trim();
 const numeric = (input: unknown) => Number(input) || 0;
+const field = (record: Record<string, unknown>, ...names: string[]) => {
+  const entries = Object.entries(record);
+  const match = entries.find(([key]) => names.some((name) => key.trim().toLowerCase() === name.toLowerCase()));
+  return match?.[1];
+};
+
+const dateField = (record: Record<string, unknown>, ...names: string[]) => {
+  const input = value(field(record, ...names));
+  return new Date(`${input}T00:00:00`);
+};
 
 const toRow = (record: Record<string, unknown>): OrderRow => ({
-  rowId: numeric(record["Row ID"]),
-  orderId: value(record["Order ID"]),
-  orderDate: new Date(`${value(record["Order Date"])}T00:00:00`),
-  shipDate: new Date(`${value(record["Ship Date"])}T00:00:00`),
-  shipMode: value(record["Ship Mode"]),
-  customerId: value(record["Customer ID"]),
-  customerName: value(record["Customer Name"]),
-  segment: value(record.Segment),
-  country: value(record.Country),
-  city: value(record.City),
-  state: value(record.State),
-  postalCode: value(record["Postal Code"]),
-  region: value(record.Region),
-  productId: value(record["Product ID"]),
-  category: value(record.Category),
-  subCategory: value(record["Sub-Category"]),
-  productName: value(record["Product Name"]),
-  sales: numeric(record.Sales),
-  quantity: numeric(record.Quantity),
-  discount: numeric(record.Discount),
-  profit: numeric(record.Profit),
+  rowId: numeric(field(record, "Row ID", "ID", "Record ID")),
+  orderId: value(field(record, "Order ID", "Transaction ID", "Invoice", "Order")),
+  orderDate: dateField(record, "Order Date", "Date", "Transaction Date", "Invoice Date"),
+  shipDate: dateField(record, "Ship Date", "Delivery Date", "Due Date"),
+  shipMode: value(field(record, "Ship Mode", "Shipping Method", "Delivery Method")),
+  customerId: value(field(record, "Customer ID", "Client ID", "Account ID", "Customer")),
+  customerName: value(field(record, "Customer Name", "Client", "Account Name", "Customer")),
+  segment: value(field(record, "Segment", "Customer Type", "Market Segment")),
+  country: value(field(record, "Country", "Nation")),
+  city: value(field(record, "City", "Town")),
+  state: value(field(record, "State", "Province")),
+  postalCode: value(field(record, "Postal Code", "ZIP", "Zip Code")),
+  region: value(field(record, "Region", "Territory", "Area", "Location")),
+  productId: value(field(record, "Product ID", "Item ID", "SKU", "SKU ID")),
+  category: value(field(record, "Category", "Department", "Product Category", "Type")),
+  subCategory: value(field(record, "Sub-Category", "Subcategory", "Product Group")),
+  productName: value(field(record, "Product Name", "Item", "Item Name", "Service", "Description")),
+  sales: numeric(field(record, "Sales", "Revenue", "Amount", "Total", "Value")),
+  quantity: numeric(field(record, "Quantity", "Units", "Count", "Volume")),
+  discount: numeric(field(record, "Discount", "Discount Rate", "Promotion")),
+  profit: numeric(field(record, "Profit", "Gross Profit", "Net Profit", "Margin")),
 });
 
 export function DataProvider({ children }: { children: ReactNode }) {
@@ -47,31 +59,53 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [range, setRange] = useState<DateRange>({ startDate: "", endDate: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sourceName, setSourceName] = useState("superstore_clean.csv");
+
+  const useRecords = (data: Record<string, unknown>[], errors: Papa.ParseError[], name: string) => {
+    if (errors.length) setError("Some rows could not be parsed, so only valid rows were loaded.");
+    const parsed = data.map(toRow).filter((row) => !Number.isNaN(row.orderDate.getTime()));
+    if (!parsed.length) {
+      setError("This CSV needs a recognizable date column and at least one valid data row.");
+      setIsLoading(false);
+      return;
+    }
+    const dates = parsed.map((row) => row.orderDate.getTime());
+    setRows(parsed);
+    setRange({ startDate: dateInputValue(new Date(Math.min(...dates))), endDate: dateInputValue(new Date(Math.max(...dates))) });
+    setSourceName(name);
+    setError(null);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     Papa.parse<Record<string, unknown>>(`${import.meta.env.BASE_URL}data/superstore_clean.csv`, {
       download: true,
       header: true,
       skipEmptyLines: true,
-      complete: ({ data, errors }) => {
-        if (errors.length) setError("The cleaned CSV could not be parsed.");
-        const parsed = data.map(toRow).filter((row) => !Number.isNaN(row.orderDate.getTime()));
-        setRows(parsed);
-        if (parsed.length) {
-          const dates = parsed.map((row) => row.orderDate.getTime());
-          setRange({
-            startDate: dateInputValue(new Date(Math.min(...dates))),
-            endDate: dateInputValue(new Date(Math.max(...dates))),
-          });
-        }
-        setIsLoading(false);
-      },
+      complete: ({ data, errors }) => useRecords(data, errors, "superstore_clean.csv"),
       error: () => {
         setError("The cleaned CSV could not be loaded. Run `npm run copy-data` and refresh.");
         setIsLoading(false);
       },
     });
   }, []);
+
+  const importCsv = (file: File) => new Promise<void>((resolve) => {
+    setIsLoading(true);
+    Papa.parse<Record<string, unknown>>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: ({ data, errors }) => {
+        useRecords(data, errors, file.name);
+        resolve();
+      },
+      error: () => {
+        setError("The selected CSV could not be loaded.");
+        setIsLoading(false);
+        resolve();
+      },
+    });
+  });
 
   const dateBounds = useMemo(() => {
     if (!rows.length) return { startDate: "", endDate: "" };
@@ -87,7 +121,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [range, rows],
   );
 
-  return <DataContext.Provider value={{ rows, filteredRows, range, setRange, isLoading, error, dateBounds }}>{children}</DataContext.Provider>;
+  return <DataContext.Provider value={{ rows, filteredRows, range, setRange, isLoading, error, dateBounds, sourceName, importCsv }}>{children}</DataContext.Provider>;
 }
 
 export function useData() {

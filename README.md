@@ -83,6 +83,24 @@ npm run dev
 4. Build for Production:
 npm run build
 
+USING A DIFFERENT BUSINESS CSV
+
+The dashboard keeps the bundled Superstore file as its default, but it also supports importing another CSV from the `Import CSV` button in the header. This does not replace the bundled file or change the codebase; it changes the data for the current browser session only.
+
+The importer recognizes common alternatives automatically:
+
+• Date: `Order Date`, `Date`, `Transaction Date`, or `Invoice Date`
+• Revenue: `Sales`, `Revenue`, `Amount`, `Total`, or `Value`
+• Product: `Product Name`, `Item`, `Item Name`, `Service`, or `Description`
+• Customer: `Customer Name`, `Client`, or `Account Name`
+• Category: `Category`, `Department`, `Product Category`, or `Type`
+• Location: `Region`, `Territory`, `Area`, or `Location`
+• Profit: `Profit`, `Gross Profit`, `Net Profit`, or `Margin`
+
+At minimum, the new CSV needs a recognizable date column and a numeric revenue or sales column. Optional fields such as customers, products, regions, profit, quantity, and discount can be blank; the dashboard will continue to run, but pages that depend on those fields will have less useful results.
+
+For a permanent business deployment, place the cleaned file at `data/processed/superstore_clean.csv` or update `webapp/scripts/copy-data.mjs`, then run `npm run build` and push to `main`. The browser import is best for trying a new business dataset without touching the existing deployed configuration.
+
 CONTINUOUS INTEGRATION & DEPLOYMENT (CI/CD)
 
 The project leverages GitHub Actions for continuous deployment to GitHub Pages.
